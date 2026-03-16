@@ -18,14 +18,14 @@ class TestJob(unittest.TestCase):
 
         self.assertFalse(base_dir.exists())
 
-        job = Job(base_dir=str(base_dir))
+        job = Job.create(base_dir=str(base_dir))
 
         self.assertTrue(base_dir.exists())
         self.assertTrue(base_dir.is_dir())
         self.assertTrue((base_dir / job.job_id).exists())
 
     def test_creates_full_workspace_directory_structure(self):
-        job = Job(base_dir=self.temp_dir)
+        job = Job.create(base_dir=self.temp_dir)
 
         self.assertTrue(job.root.exists())
         self.assertTrue(job.input_dir.exists())
@@ -40,20 +40,20 @@ class TestJob(unittest.TestCase):
         self.assertTrue(job.logs_dir.is_dir())
 
     def test_generates_unique_job_id(self):
-        job1 = Job(base_dir=self.temp_dir)
-        job2 = Job(base_dir=self.temp_dir)
+        job1 = Job.create(base_dir=self.temp_dir)
+        job2 = Job.create(base_dir=self.temp_dir)
 
         self.assertNotEqual(job1.job_id, job2.job_id)
 
     def test_job_id_is_non_empty_string(self):
-        job = Job(base_dir=self.temp_dir)
+        job = Job.create(base_dir=self.temp_dir)
 
         self.assertIsInstance(job.job_id, str)
         self.assertTrue(job.job_id)
         self.assertGreater(len(job.job_id), 0)
 
     def test_paths_are_built_under_base_dir(self):
-        job = Job(base_dir=self.temp_dir)
+        job = Job.create(base_dir=self.temp_dir)
 
         expected_root = Path(self.temp_dir) / job.job_id
         expected_input = expected_root / "input"
@@ -68,7 +68,7 @@ class TestJob(unittest.TestCase):
         self.assertEqual(job.logs_dir, expected_logs)
 
     def test_paths_method_returns_expected_dictionary(self):
-        job = Job(base_dir=self.temp_dir)
+        job = Job.create(base_dir=self.temp_dir)
 
         result = job.paths()
 
@@ -87,7 +87,7 @@ class TestJob(unittest.TestCase):
     def test_can_use_nested_base_directory(self):
         nested_base_dir = Path(self.temp_dir) / "var" / "data" / "jobs"
 
-        job = Job(base_dir=str(nested_base_dir))
+        job = Job.create(base_dir=str(nested_base_dir))
 
         self.assertTrue(nested_base_dir.exists())
         self.assertEqual(job.base_dir, nested_base_dir)
@@ -96,7 +96,7 @@ class TestJob(unittest.TestCase):
     def test_can_use_path_object_as_base_dir(self):
         base_dir = Path(self.temp_dir) / "jobs"
 
-        job = Job(base_dir=base_dir)
+        job = Job.create(base_dir=base_dir)
 
         self.assertEqual(job.base_dir, base_dir)
         self.assertTrue(job.root.exists())
@@ -105,7 +105,7 @@ class TestJob(unittest.TestCase):
         base_dir = Path(self.temp_dir) / "jobs"
         base_dir.mkdir(parents=True, exist_ok=True)
 
-        job = Job(base_dir=str(base_dir))
+        job = Job.create(base_dir=str(base_dir))
 
         self.assertTrue(base_dir.exists())
         self.assertTrue(job.root.exists())
@@ -113,9 +113,9 @@ class TestJob(unittest.TestCase):
     def test_multiple_jobs_can_be_created_under_same_base_directory(self):
         base_dir = Path(self.temp_dir) / "jobs"
 
-        job1 = Job(base_dir=str(base_dir))
-        job2 = Job(base_dir=str(base_dir))
-        job3 = Job(base_dir=str(base_dir))
+        job1 = Job.create(base_dir=str(base_dir))
+        job2 = Job.create(base_dir=str(base_dir))
+        job3 = Job.create(base_dir=str(base_dir))
 
         self.assertTrue((base_dir / job1.job_id).exists())
         self.assertTrue((base_dir / job2.job_id).exists())
@@ -124,7 +124,7 @@ class TestJob(unittest.TestCase):
         self.assertEqual(len({job1.job_id, job2.job_id, job3.job_id}), 3)
 
     def test_workspace_directories_are_empty_on_creation(self):
-        job = Job(base_dir=self.temp_dir)
+        job = Job.create(base_dir=self.temp_dir)
 
         self.assertEqual(list(job.input_dir.iterdir()), [])
         self.assertEqual(list(job.audio_dir.iterdir()), [])
@@ -132,7 +132,7 @@ class TestJob(unittest.TestCase):
         self.assertEqual(list(job.logs_dir.iterdir()), [])
 
     def test_workspace_creation_is_idempotent_for_existing_directories(self):
-        job = Job(base_dir=self.temp_dir)
+        job = Job.create(base_dir=self.temp_dir)
 
         # Call internal method again to confirm no exception and no damage
         job._create_workspace()
@@ -144,7 +144,7 @@ class TestJob(unittest.TestCase):
         self.assertTrue(job.logs_dir.exists())
 
     def test_string_paths_returned_by_paths_method_are_absolute_or_relative_consistent(self):
-        job = Job(base_dir=self.temp_dir)
+        job = Job.create(base_dir=self.temp_dir)
         result = job.paths()
 
         self.assertEqual(Path(result["root"]), job.root)
@@ -154,7 +154,7 @@ class TestJob(unittest.TestCase):
         self.assertEqual(Path(result["logs"]), job.logs_dir)
 
     def test_job_attributes_are_path_objects(self):
-        job = Job(base_dir=self.temp_dir)
+        job = Job.create(base_dir=self.temp_dir)
 
         self.assertIsInstance(job.base_dir, Path)
         self.assertIsInstance(job.root, Path)

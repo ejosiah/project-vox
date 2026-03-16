@@ -3,8 +3,8 @@ import uuid
 
 
 class Job:
-    def __init__(self, base_dir: str = "jobs"):
-        self.job_id = uuid.uuid4().hex
+    def __init__(self, job_id: str, base_dir: str = "jobs"):
+        self.job_id = job_id
         self.base_dir = Path(base_dir)
 
         self.root = self.base_dir / self.job_id
@@ -14,6 +14,10 @@ class Job:
         self.logs_dir = self.root / "logs"
 
         self._create_workspace()
+
+    @classmethod
+    def create(cls, base_dir: str = "jobs"):
+        return cls(job_id=uuid.uuid4().hex, base_dir=base_dir)
 
     def _create_workspace(self):
         self.base_dir.mkdir(parents=True, exist_ok=True)
