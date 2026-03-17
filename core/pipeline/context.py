@@ -38,6 +38,8 @@ class JobContext:
     # Arbitrary stage metadata
     metadata: Dict[str, Any] = field(default_factory=dict)
 
+    output_types: Optional[list[str]] = None
+
     # Error tracking
     error: Optional[str] = None
 
