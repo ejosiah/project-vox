@@ -28,6 +28,7 @@ logs/
 
 # Runtime job data
 jobs/
+staging/
 tmp/
 temp/
 

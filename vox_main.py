@@ -28,6 +28,10 @@ from core.pipeline.stages.probe_media_stage import ProbeMediaStage
 from core.pipeline.stages.transcribe_audio_stage import TranscribeAudioStage
 from core.pipeline.stages.validate_job_stage import ValidateJobStage
 from core.pipeline.stages.workspace_stage import WorkspaceStage
+from core.pipeline.stages.finalize_job_stage import FinalizeJobStage
+from core.pipeline.stages.cleanup_stage import CleanupStage
+from core.pipeline.stages.upload_output_stage import UploadOutputStage
+from core.output.staging_output_uploader import StagingFolderOutputUploader
 
 
 def generate_job_id() -> str:
@@ -59,6 +63,8 @@ def build_runner() -> JobRunner:
         )
     )
 
+    uploader = StagingFolderOutputUploader(staging_dir=Path("staging"), download_base_url="https://staging.example.com/")
+
     stages = [
         ValidateJobStage(),
         WorkspaceStage(),
@@ -71,6 +77,9 @@ def build_runner() -> JobRunner:
         AlignTranscriptStage(),
         MergeTranscriptStage(),
         GenerateOutputStage(),
+        UploadOutputStage(uploader=uploader),
+        FinalizeJobStage(),
+        CleanupStage(),
     ]
 
     return JobRunner(stages=stages)
