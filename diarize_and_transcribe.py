@@ -6,7 +6,6 @@ from core.media.transcriber import Transcriber
 from core.media.diarizer_backend import PyannoteDiarizerBackend
 from core.media.transcriber_backend import FasterWhisperTranscriberBackend
 
-
 AUDIO_FILE = "audio.wav"
 
 

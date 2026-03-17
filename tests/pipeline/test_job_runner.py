@@ -14,6 +14,7 @@ from core.pipeline.stage import Stage, StageResult, StageStatus
 class DummyContext:
     job_id: str | None = "job-123"
     events: list[str] = field(default_factory=list)
+    metadata: dict[str, str] = field(default_factory=dict)
 
 
 class RecordingStage(Stage):
@@ -169,7 +170,7 @@ def test_cleanup_failure_is_swallowed() -> None:
 
 
 def test_extracts_job_id_from_dict_context() -> None:
-    context = {"job_id": "job-789", "events": []}
+    context = {"job_id": "job-789", "events": [], "metadata" : {}}
     runner = JobRunner(
         [
             RecordingStage("validate"),
@@ -202,6 +203,7 @@ def test_should_run_missing_defaults_to_true() -> None:
     class NoShouldRunContext:
         job_id: str = "job-123"
         events: list[str] = field(default_factory=list)
+        metadata: dict[str, str] = field(default_factory=dict)
 
     class NoShouldRunStage(Stage):
         name = "validate"

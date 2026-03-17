@@ -71,9 +71,10 @@ class JobRunner:
         except StageExecutionError as exc:
             failure = exc
             self._logger.exception(
-                "Job pipeline failed for job_id=%s at stage=%s",
+                "Job pipeline failed for job_id=%s at stage=%s, reasion: %s",
                 exc.job_id,
                 exc.stage_name,
+                active_context.error if hasattr(active_context, "error") else str(exc.cause),
             )
         finally:
             active_context = self._run_cleanup_stages(active_context)
@@ -108,6 +109,7 @@ class JobRunner:
 
         try:
             result = stage.run(context)
+            self._logger.debug("Stage=%s for job_id=%s returned result: %s", stage_name, job_id, result)
         except Exception as exc:
             raise StageExecutionError(
                 stage_name=stage_name,
@@ -144,6 +146,12 @@ class JobRunner:
             return context
 
         next_context = result.context
+        if (
+            hasattr(next_context, "metadata")
+            and isinstance(getattr(next_context, "metadata"), dict)
+            and isinstance(result.metadata, dict)
+        ):
+            next_context.metadata |= result.metadata
 
         self._logger.info(
             "Completed stage=%s for job_id=%s in %.3fs",

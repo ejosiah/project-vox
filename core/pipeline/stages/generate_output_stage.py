@@ -30,9 +30,7 @@ class GenerateOutputStage(Stage):
     def run(self, context: JobContext) -> StageResult:
         output_types = list(getattr(context, "output_types", []) or [])
         if not output_types:
-            raise ValueError(
-                "context.output_types is required for GenerateOutputStage"
-            )
+            raise ValueError("context.output_types is required for GenerateOutputStage")
 
         unsupported = sorted(
             output_type
@@ -40,9 +38,7 @@ class GenerateOutputStage(Stage):
             if output_type not in self.SUPPORTED_OUTPUT_TYPES
         )
         if unsupported:
-            raise ValueError(
-                f"Unsupported output types requested: {', '.join(unsupported)}"
-            )
+            raise ValueError(f"Unsupported output types requested: {', '.join(unsupported)}")
 
         workspace_dir = context.metadata.get("workspace_dir")
         if not workspace_dir:
@@ -96,6 +92,7 @@ class GenerateOutputStage(Stage):
             encoding="utf-8",
         )
 
+
     def _write_json(self, output_path: Path, transcript: Any) -> None:
         if hasattr(transcript, "to_dict"):
             payload = transcript.to_dict()
@@ -115,7 +112,7 @@ class GenerateOutputStage(Stage):
             }
 
         output_path.write_text(
-            json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+            json.dumps(payload, ensure_ascii=False, indent=2, default=self._json_default) + "\n",
             encoding="utf-8",
         )
 
@@ -131,11 +128,7 @@ class GenerateOutputStage(Stage):
             start = self._format_srt_timestamp(float(getattr(segment, "start", 0.0)))
             end = self._format_srt_timestamp(float(getattr(segment, "end", 0.0)))
 
-            blocks.append(
-                f"{index}\n"
-                f"{start} --> {end}\n"
-                f"{speaker}: {text}"
-            )
+            blocks.append(f"{index}\n" f"{start} --> {end}\n" f"{speaker}: {text}")
 
         output_path.write_text(
             "\n\n".join(blocks) + ("\n" if blocks else ""),
@@ -173,3 +166,16 @@ class GenerateOutputStage(Stage):
         minutes, remainder = divmod(remainder, 60_000)
         secs, milliseconds = divmod(remainder, 1000)
         return f"{hours:02d}:{minutes:02d}:{secs:02d}.{milliseconds:03d}"
+    
+    @staticmethod
+    def _json_default(value: Any) -> Any:
+        if hasattr(value, "__dict__"):
+            return value.__dict__
+
+        if hasattr(value, "__dataclass_fields__"):
+            return {
+                field_name: getattr(value, field_name)
+                for field_name in value.__dataclass_fields__
+            }
+
+        return str(value)
