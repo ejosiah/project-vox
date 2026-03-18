@@ -44,6 +44,7 @@ class Worker:
         for _, messages in records.items():
             for message in messages:
                 self._handle_message(message)
+                self._consumer.commit()
 
     def _handle_message(self, message: Any) -> None:
         try:
