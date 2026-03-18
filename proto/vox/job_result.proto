@@ -1,0 +1,38 @@
+// proto/vox/job_result.proto
+
+syntax = "proto3";
+
+package vox;
+
+import "vox/common.proto";
+import "google/protobuf/timestamp.proto";
+
+message OutputArtifact {
+  OutputType output_type = 1;
+  string destination = 2;
+  string download_url = 3;
+}
+
+message JobError {
+  string stage = 1;
+  string type = 2;
+  string message = 3;
+}
+
+message TimingInfo {
+  google.protobuf.Timestamp started_at = 1;
+  google.protobuf.Timestamp completed_at = 2;
+}
+
+message JobResult {
+  string schema_version = 1;
+  string job_id = 2;
+  string correlation_id = 3;
+  google.protobuf.Timestamp completed_at = 4;
+
+  JobState state = 5;
+  repeated OutputArtifact outputs = 6;
+  TimingInfo timing = 7;
+  JobError error = 8;
+  repeated KeyValue metadata = 9;
+}

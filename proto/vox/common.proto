@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package vox;
+
+import "google/protobuf/timestamp.proto";
+
+message KeyValue {
+  string key = 1;
+  string value = 2;
+}
+
+enum OutputType {
+  OUTPUT_TYPE_UNSPECIFIED = 0;
+  OUTPUT_TYPE_TXT = 1;
+  OUTPUT_TYPE_JSON = 2;
+  OUTPUT_TYPE_SRT = 3;
+  OUTPUT_TYPE_VTT = 4;
+}
+
+enum JobState {
+  JOB_STATE_UNSPECIFIED = 0;
+  JOB_STATE_QUEUED = 1;
+  JOB_STATE_RUNNING = 2;
+  JOB_STATE_SUCCEEDED = 3;
+  JOB_STATE_FAILED = 4;
+}

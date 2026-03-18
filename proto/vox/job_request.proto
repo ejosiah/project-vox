@@ -1,0 +1,61 @@
+// proto/vox/job_request.proto
+
+syntax = "proto3";
+
+package vox;
+
+import "vox/common.proto";
+import "google/protobuf/timestamp.proto";
+
+message LocalFileSource {
+  string path = 1;
+}
+
+message HttpSource {
+  string url = 1;
+}
+
+message S3Source {
+  string bucket = 1;
+  string key = 2;
+  string region = 3;
+}
+
+message Source {
+  oneof location {
+    LocalFileSource local_file = 1;
+    HttpSource http = 2;
+    S3Source s3 = 3;
+  }
+}
+
+message TranscriptionOptions {
+  string model_name = 1;
+  string language = 2;
+  bool vad_filter = 3;
+}
+
+message DiarizationOptions {
+  bool enabled = 1;
+  uint32 num_speakers = 2;
+  uint32 min_speakers = 3;
+  uint32 max_speakers = 4;
+}
+
+message ProcessingOptions {
+  TranscriptionOptions transcription = 1;
+  DiarizationOptions diarization = 2;
+}
+
+message JobRequest {
+  string schema_version = 1;
+  string job_id = 2;
+  string correlation_id = 3;
+  google.protobuf.Timestamp created_at = 4;
+
+  Source source = 5;
+  repeated OutputType output_types = 6;
+  ProcessingOptions options = 7;
+
+  repeated KeyValue metadata = 8;
+}

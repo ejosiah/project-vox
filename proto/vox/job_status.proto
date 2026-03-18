@@ -1,0 +1,27 @@
+// proto/vox/job_status.proto
+
+syntax = "proto3";
+
+package vox;
+
+import "vox/common.proto";
+import "google/protobuf/timestamp.proto";
+
+message WorkerInfo {
+  string worker_id = 1;
+  string hostname = 2;
+}
+
+message JobStatusEvent {
+  string schema_version = 1;
+  string job_id = 2;
+  string correlation_id = 3;
+  google.protobuf.Timestamp emitted_at = 4;
+
+  JobState state = 5;
+  string stage = 6;
+  uint32 attempt = 7;
+
+  WorkerInfo worker = 8;
+  repeated KeyValue details = 9;
+}
