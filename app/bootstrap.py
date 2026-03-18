@@ -30,6 +30,7 @@ from core.pipeline.stages.transcribe_audio_stage import TranscribeAudioStage
 from core.pipeline.stages.upload_output_stage import UploadOutputStage
 from core.pipeline.stages.validate_job_stage import ValidateJobStage
 from core.pipeline.stages.workspace_stage import WorkspaceStage
+from core.pipeline.stages.workspace_stage import WorkspaceStageConfig
 from core.worker.worker import Worker
 
 
@@ -87,7 +88,7 @@ def build_job_runner(settings: AppSettings) -> JobRunner:
 
     stages = [
         ValidateJobStage(),
-        WorkspaceStage(),
+        WorkspaceStage(config=WorkspaceStageConfig(base_dir=settings.workspace_root)),
         DownloadInputStage(),
         ProbeMediaStage(ffmpeg=ffmpeg),
         ExtractAudioStage(ffmpeg=ffmpeg),

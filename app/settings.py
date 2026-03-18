@@ -42,10 +42,10 @@ def load_settings() -> AppSettings:
         upload=UploadSettings(
             strategy=os.getenv("UPLOAD_STRATEGY", "staging_folder"),
             s3_bucket=os.getenv("UPLOAD_S3_BUCKET"),
-            s3_prefix=os.getenv("UPLOAD_S3_PREFIX", "jobs"),
-            staging_dir=os.getenv("UPLOAD_STAGING_DIR"),
+            s3_prefix=os.getenv("UPLOAD_S3_PREFIX", "vox/jobs"),
+            staging_dir=os.getenv("UPLOAD_STAGING_DIR", "/tmp/vox/staging"),
             download_base_url=os.getenv("UPLOAD_DOWNLOAD_BASE_URL"),
         ),
-        workspace_root=os.getenv("WORKSPACE_ROOT", "/tmp/project-vox"),
+        workspace_root=os.getenv("WORKSPACE_ROOT", "/tmp/vox/jobs"),
         log_level=os.getenv("LOG_LEVEL", "INFO"),
     )
