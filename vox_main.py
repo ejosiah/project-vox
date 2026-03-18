@@ -41,7 +41,7 @@ def generate_job_id() -> str:
 def build_request(source: str, output_types: list[str]) -> dict[str, Any]:
     return {
         "job_id": generate_job_id(),
-        "input_uri": source,
+        "source": source,
         "output_types": output_types,
     }
 

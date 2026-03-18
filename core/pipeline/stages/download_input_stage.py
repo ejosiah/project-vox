@@ -22,13 +22,13 @@ class DownloadInputStage(Stage):
     name = "download_input"
 
     def run(self, context: JobContext) -> StageResult:
-        if not context.input_uri:
-            raise ValueError("context.input_uri is required for DownloadInputStage")
+        if not context.request.get("source"):
+            raise ValueError("context.request.source is required for DownloadInputStage")
 
         destination_dir = self._resolve_destination_dir(context)
         destination_dir.mkdir(parents=True, exist_ok=True)
 
-        source = str(context.input_uri)
+        source = str(context.request.get("source"))
         parsed = urlparse(source)
 
         if parsed.scheme in ("http", "https"):
@@ -50,7 +50,7 @@ class DownloadInputStage(Stage):
             context=context,
             metadata={
                 "job_id": context.job_id,
-                "input_uri": context.input_uri,
+                "source": source,
                 "input_path": str(destination),
             },
         )

@@ -17,9 +17,8 @@ def test_download_input_stage_copies_local_file_into_workspace(tmp_path: Path) -
     job = Job(job_id="job-123", base_dir=str(tmp_path / "jobs"))
     context = JobContext(
         job_id="job-123",
-        request={"job_id": "job-123", "input_uri": str(source_file)},
+        request={"job_id": "job-123", "source": str(source_file)},
         workspace_dir=Path(job.root),
-        input_uri=str(source_file),
         metadata={"job": job},
     )
 
@@ -36,7 +35,7 @@ def test_download_input_stage_copies_local_file_into_workspace(tmp_path: Path) -
     assert expected_path.read_bytes() == b"video-data"
     assert result.metadata == {
         "job_id": "job-123",
-        "input_uri": str(source_file),
+        "source": str(source_file),
         "input_path": str(expected_path),
     }
 
@@ -48,7 +47,7 @@ def test_download_input_stage_copies_file_uri_into_workspace(tmp_path: Path) -> 
     job = Job(job_id="job-456", base_dir=str(tmp_path / "jobs"))
     context = JobContext(
         job_id="job-456",
-        request={"job_id": "job-456", "input_uri": source_file.as_uri()},
+        request={"job_id": "job-456", "source": source_file.as_uri()},
         workspace_dir=Path(job.root),
         input_uri=source_file.as_uri(),
         metadata={"job": job},
@@ -71,7 +70,7 @@ def test_download_input_stage_downloads_http_input_into_workspace(
     job = Job(job_id="job-789", base_dir=str(tmp_path / "jobs"))
     context = JobContext(
         job_id="job-789",
-        request={"job_id": "job-789", "input_uri": "https://example.com/media/test.mp3"},
+        request={"job_id": "job-789", "source": "https://example.com/media/test.mp3"},
         workspace_dir=Path(job.root),
         input_uri="https://example.com/media/test.mp3",
         metadata={"job": job},
@@ -109,13 +108,12 @@ def test_download_input_stage_raises_when_input_uri_missing(tmp_path: Path) -> N
         job_id="job-missing",
         request={"job_id": "job-missing"},
         workspace_dir=Path(job.root),
-        input_uri=None,
         metadata={"job": job},
     )
 
     stage = DownloadInputStage()
 
-    with pytest.raises(ValueError, match="context.input_uri is required"):
+    with pytest.raises(ValueError, match="context.request.source is required"):
         stage.run(context)
 
 
@@ -127,7 +125,7 @@ def test_download_input_stage_raises_when_workspace_is_missing_and_no_job_metada
 
     context = JobContext(
         job_id="job-no-workspace",
-        request={"job_id": "job-no-workspace", "input_uri": str(source_file)},
+        request={"job_id": "job-no-workspace", "source": str(source_file)},
         workspace_dir=None,
         input_uri=str(source_file),
     )
@@ -143,7 +141,7 @@ def test_download_input_stage_raises_for_missing_local_source(tmp_path: Path) ->
     job = Job(job_id="job-missing-file", base_dir=str(tmp_path / "jobs"))
     context = JobContext(
         job_id="job-missing-file",
-        request={"job_id": "job-missing-file", "input_uri": str(missing_file)},
+        request={"job_id": "job-missing-file", "source": str(missing_file)},
         workspace_dir=Path(job.root),
         input_uri=str(missing_file),
         metadata={"job": job},
@@ -159,7 +157,7 @@ def test_download_input_stage_raises_for_unsupported_uri_scheme(tmp_path: Path) 
     job = Job(job_id="job-unsupported", base_dir=str(tmp_path / "jobs"))
     context = JobContext(
         job_id="job-unsupported",
-        request={"job_id": "job-unsupported", "input_uri": "s3://bucket/file.mp4"},
+        request={"job_id": "job-unsupported", "source": "s3://bucket/file.mp4"},
         workspace_dir=Path(job.root),
         input_uri="s3://bucket/file.mp4",
         metadata={"job": job},

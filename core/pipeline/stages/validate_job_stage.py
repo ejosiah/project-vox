@@ -10,7 +10,7 @@ class ValidateJobStage(Stage):
     name = "validate"
 
     def __init__(self, required_fields: Iterable[str] | None = None) -> None:
-        self._required_fields = tuple(required_fields or ("job_id", "input_uri"))
+        self._required_fields = tuple(required_fields or ("job_id", "source"))
 
     def run(self, context: JobContext) -> StageResult:
         request = context.request
@@ -41,15 +41,13 @@ class ValidateJobStage(Stage):
                 context=context,
             )
 
-        input_uri = request.get("input_uri")
-        if not input_uri:
-            context.set_error("input_uri is required")
+        source = request.get("source")
+        if not source:
+            context.set_error("source is required")
             return StageResult(
                 status=StageStatus.FAILED,
                 context=context,
             )
-
-        context.input_uri = str(input_uri)
 
         return StageResult(
             status=StageStatus.SUCCESS,
