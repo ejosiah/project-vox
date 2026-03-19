@@ -5,7 +5,11 @@ export PYTHONPATH=.
 
 VIDEO_FILE?=./monologe.MOV
 OUTPUT_TYPES?=txt json
-BOOTSTRAP_SERVERS?=localhost:9092
+
+KAFKA_CONTAINER := kafka-broker-1
+KAFKA_BIN := /opt/kafka/bin
+BOOTSTRAP_SERVERS?=kafka-broker-1:9092,kafka-broker-2:9094,kafka-broker-3:9096
+BOOTSTRAP_SERVERS_SINGLE?=kafka-broker-1:9092
 TOPIC?=vox.jobs.request
 
 PROTO_DIR=proto
@@ -49,10 +53,6 @@ submit-job:
 		--bootstrap-servers $(BOOTSTRAP_SERVERS) \
 		--topic $(TOPIC)
 
-KAFKA_CONTAINER := kafka
-KAFKA_BIN := /opt/kafka/bin
-BOOTSTRAP := localhost:9092
-
 kafka-up:
 	docker-compose up -d
 
@@ -67,7 +67,7 @@ topic-create:
 	docker exec -it $(KAFKA_CONTAINER) $(KAFKA_BIN)/kafka-topics.sh \
 		--create \
 		--topic $(TOPIC) \
-		--bootstrap-server $(BOOTSTRAP) \
+		--bootstrap-server $(BOOTSTRAP_SERVERS) \
 		--partitions 1 \
 		--replication-factor 1
 
@@ -75,24 +75,24 @@ topic-create:
 topic-list:
 	docker exec -it $(KAFKA_CONTAINER) $(KAFKA_BIN)/kafka-topics.sh \
 		--list \
-		--bootstrap-server $(BOOTSTRAP)
+		--bootstrap-server $(BOOTSTRAP_SERVERS)
 
 # Delete a topic: make topic-delete TOPIC=test
 topic-delete:
 	docker exec -it $(KAFKA_CONTAINER) $(KAFKA_BIN)/kafka-topics.sh \
 		--delete \
 		--topic $(TOPIC) \
-		--bootstrap-server $(BOOTSTRAP)
+		--bootstrap-server $(BOOTSTRAP_SERVERS)
 
 topic-consume:
 	docker exec -it $(KAFKA_CONTAINER) $(KAFKA_BIN)/kafka-console-consumer.sh \
 		--topic $(TOPIC) \
-		--bootstrap-server $(BOOTSTRAP)
+		--bootstrap-server $(BOOTSTRAP_SERVERS)
 
 topic-consume-beginning:
 	docker exec -it $(KAFKA_CONTAINER) $(KAFKA_BIN)/kafka-console-consumer.sh \
 		--topic $(TOPIC) \
-		--bootstrap-server $(BOOTSTRAP) \
+		--bootstrap-server $(BOOTSTRAP_SERVERS) \
 		--from-beginning
 
 run:

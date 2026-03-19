@@ -34,7 +34,7 @@ class AppSettings:
 def load_settings() -> AppSettings:
     return AppSettings(
         kafka=KafkaSettings(
-            bootstrap_servers=os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092"),
+            bootstrap_servers=os.getenv("KAFKA_BOOTSTRAP_SERVERS", "kafka-broker-1:9092,kafka-broker-2:9094,kafka-broker-3:9096"),
             input_topic=os.getenv("KAFKA_INPUT_TOPIC", "vox.jobs.request"),
             output_topic=os.getenv("KAFKA_OUTPUT_TOPIC", "vox.jobs.result"),
             group_id=os.getenv("KAFKA_GROUP_ID", "project-vox-worker"),
@@ -47,5 +47,5 @@ def load_settings() -> AppSettings:
             download_base_url=os.getenv("UPLOAD_DOWNLOAD_BASE_URL", "http://example.com/downloads"),
         ),
         workspace_root=os.getenv("WORKSPACE_ROOT", "/tmp/vox/jobs"),
-        log_level=os.getenv("LOG_LEVEL", "DEBUG"),
+        log_level=os.getenv("LOG_LEVEL", "INFO"),
     )
