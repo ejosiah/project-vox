@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from kafka import KafkaConsumer, KafkaProducer
+from confluent_kafka  import Consumer, Producer
 
 from app.settings import AppSettings
 from core.media.diarizer import Diarizer
@@ -32,6 +32,8 @@ from core.pipeline.stages.validate_job_stage import ValidateJobStage
 from core.pipeline.stages.workspace_stage import WorkspaceStage
 from core.pipeline.stages.workspace_stage import WorkspaceStageConfig
 from core.worker.worker import Worker
+
+LOGGER = logging.getLogger(__name__)
 
 
 def configure_logging(level: str) -> None:
@@ -106,20 +108,22 @@ def build_job_runner(settings: AppSettings) -> JobRunner:
     return JobRunner(stages=stages)
 
 
-def build_consumer(settings: AppSettings) -> KafkaConsumer:
-    return KafkaConsumer(
-        settings.kafka.input_topic,
-        bootstrap_servers=settings.kafka.bootstrap_servers,
-        group_id=settings.kafka.group_id,
-        enable_auto_commit=False,
-        value_deserializer=lambda value: value,
+def build_consumer(settings: AppSettings) -> Consumer:
+    return Consumer(
+        {
+            "bootstrap.servers": settings.kafka.bootstrap_servers,
+            "group.id": settings.kafka.group_id,
+            "enable.auto.commit": False,
+            "auto.offset.reset": "earliest",
+        }
     )
 
 
-def build_producer(settings: AppSettings) -> KafkaProducer:
-    return KafkaProducer(
-        bootstrap_servers=settings.kafka.bootstrap_servers,
-        value_serializer=lambda value: value,
+def build_producer(settings: AppSettings) -> Producer:
+    return Producer(
+        {
+            "bootstrap.servers": settings.kafka.bootstrap_servers,
+        }
     )
 
 
@@ -138,9 +142,15 @@ def serialize_job_result(message: Any) -> bytes:
 
 
 def build_worker(settings: AppSettings) -> Worker:
+    consumer = build_consumer(settings)
+    consumer.subscribe([settings.kafka.input_topic])
+    LOGGER.info("Kafka consumer subscribed")
+
+    producer = build_producer(settings)
+
     return Worker(
-        consumer=build_consumer(settings),
-        producer=build_producer(settings),
+        consumer=consumer,
+        producer=producer,
         job_runner=build_job_runner(settings),
         request_deserializer=deserialize_job_request,
         result_serializer=serialize_job_result,

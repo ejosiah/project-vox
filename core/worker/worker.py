@@ -35,14 +35,22 @@ class Worker:
         self._message_mapper = message_mapper or MessageMapper()
 
     def run_once(self) -> None:
-        records = self._consumer.poll(timeout_ms=1000)
+        LOGGER.debug("Polling Kafka for message...")
+        message = self._consumer.poll(1.0)
 
-        for _, messages in records.items():
-            for message in messages:
-                self._handle_message(message)
+        if message is None:
+            LOGGER.debug("Poll returned no message")
+            return
+
+        if message.error():
+            LOGGER.error("Kafka consumer error: %s", message.error())
+            return
+
+        LOGGER.info("Received Kafka message on topic=%s", message.topic())
+        self._handle_message(message)
 
     def _handle_message(self, message: Any) -> None:
-        request = self._request_deserializer(message.value)
+        request = self._request_deserializer(message.value())
         context = self._message_mapper.request_to_context(request)
         context.metadata["started_at"] = datetime.now(timezone.utc).isoformat()
 
@@ -61,6 +69,10 @@ class Worker:
             )
 
         payload = self._result_serializer(result_message)
-        self._producer.send(self._output_topic, payload)
+        self._producer.produce(
+            topic=self._output_topic,
+            key=context.job_id.encode("utf-8"),
+            value=payload,
+        )
         self._producer.flush()
-        self._consumer.commit()
+        self._consumer.commit(message=message)
