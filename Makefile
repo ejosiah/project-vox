@@ -96,4 +96,4 @@ topic-consume-beginning:
 		--from-beginning
 
 run:
-	$(PYTHON) -m app.main
+	$(PYTHON) -m core.app.main
