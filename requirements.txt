@@ -13,6 +13,7 @@ pyannote.core>=5.0.0
 
 # API
 pydantic>=2.6,<3.0
+fastapi>=0.110,<1.0
 
 # Utilities
 numpy>=1.24.0
