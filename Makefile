@@ -23,7 +23,8 @@ PROTO_FILES := $(PROTO_DIR)/vox/common.proto \
 .PHONY: kafka-up kafka-down kafka-logs \
         topic-create topic-list topic-delete \
 		proto submit-job format lint test  \
-		topic-consume topic-consume-beginning run
+		topic-consume topic-consume-beginning run \
+		submit-job-api
 
 proto:
 	python -m grpc_tools.protoc \
@@ -52,6 +53,9 @@ submit-job:
 		--output-types $(OUTPUT_TYPES) \
 		--bootstrap-servers $(BOOTSTRAP_SERVERS) \
 		--topic $(TOPIC)
+
+submit-job-api:
+	python scripts/submit_job_api.py --file "$(VIDEO_FILE)" --outputs "$(OUTPUT_TYPES)"
 
 kafka-up:
 	docker-compose up -d
@@ -95,5 +99,8 @@ topic-consume-beginning:
 		--bootstrap-server $(BOOTSTRAP_SERVERS) \
 		--from-beginning
 
-run:
+run-core:
 	$(PYTHON) -m core.app.main
+
+run-api:
+	$(PYTHON) -m api.app.main
